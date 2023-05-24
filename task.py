@@ -1,58 +1,54 @@
 # pylint: disable= missing-docstring
-import string
 import random
-from pymongo import MongoClient
-from pymongo.database import Database
-
-# inputu reiksmes
-# database_name = input("Enter database name: ")
-# coll_name = input("Enter collection name: ")
-field_name, field_type = input("Enter field names and types (vardas,str): ").split(",")
-range_min, range_max = input("Enter field ranges (min,max): ").split(",")
-num_documents = int(input("Enter number of documents to create: "))
-
-# db pasijungimas iki mongo
-client = MongoClient("localhost", 27017)
-
-
-# database sukurimas
-def create_database(db_name: str) -> Database:
-    return client[db_name]
-
-
-# collection sukurimas
-def create_collection(db_name: str, collection_name: str) -> Database:
-    db = client[db_name]
-    return db[collection_name]
+from random_word import RandomWords
+from database import get_db
 
 
 # sukuriam random fieldus pagal min ir max reiksmes
 def generate_random(field_type, min_length, max_length):
     if field_type == "str":
-        length = random.randint(int(min_length), int(max_length))
-        letters = string.ascii_letters
-        random_string = "".join(random.choice(letters) for _ in range(length))
-        return random_string
+        r_word = RandomWords()
+        random_word = r_word.get_random_word()
+        return random_word
     if field_type == "int":
-        random_int = random.uniform(min_length, max_length)
+        random_int = random.randint(int(min_length), int(max_length.get()))
         return random_int
     if field_type == "float":
-        random_float = round(random.uniform(min_length, max_length), 2)
+        random_float = round(random.uniform(min_length.get(), max_length.get()), 2)
         return random_float
     else:
         return None
 
 
-db = client["task_one"]
-collection = db["bandymas"]
+def generate(
+    db_name, collection, need_docs, field_type, field_name, range_min, range_max
+):
+    client = get_db(db_name.get())
+    collection = client[collection.get()]
+    need_doc_entry_int = int(need_docs.get())
+    for _ in range(need_doc_entry_int):
+        document = {}
+        document[field_name.get()] = generate_random(
+            field_type.get(), range_min.get(), range_max.get()
+        )
+        collection.insert_one(document)
 
-for _ in range(num_documents):
-    document = {}
-    document[field_name] = generate_random(field_type, range_min, range_max)
-    print(generate_random(field_type, range_min, range_max))
-    collection.insert_one(document)
+
+def update_document(db_name, collection_name, query, update):
+    db = get_db(db_name.get())
+    collection = db[collection_name]
+    result = collection.update_many(query, {"$set": update})
+    return result.modified_count
 
 
-# create_database("task_one")
-# create_collection("task_one", "bandymas")
-# generate_random_data(field_type, range_min, range_max)
+def update_collection(
+    db_name, collection, field_type, field_name, range_min, range_max
+):
+    client = get_db(db_name.get())
+    collection = client[collection.get()]
+    # need_doc_entry_int = int(need_docs.get())
+    for element in collection.find():
+        value = generate_random(field_type.get(), range_min.get(), range_max.get())
+        element.update_one(
+            {}, {"$set": {field_name.get(): value}}, upsert=False, array_filters=None
+        )
