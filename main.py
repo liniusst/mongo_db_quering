@@ -1,10 +1,10 @@
 # pylint: disable= missing-docstring
 # from bson.objectid import ObjectId
 from typing import Dict, Any, List
-from database import get_database
+from database import get_db
 
 # Connection to db
-db = get_database()
+db = get_db()
 collection = db["users"]
 
 

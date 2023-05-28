@@ -2,6 +2,7 @@
 import tkinter as tk
 from task import generate, update_collection
 from database import get_db, create_collection
+import timeit
 
 
 # tk lango nustatymai
@@ -84,13 +85,15 @@ update_button = tk.Button(
         range_max_entry,
     ),
 )
-
-
+# exec_time_sec = timeit.timeit(create_db_button)
+# exec_time = tk.Label(root, text=f"Laikas: {timeit.timeit(lambda: update_collection)}")
+# exec_time_sec = timeit.timeit(create_db_button)
 # sudedam mygtuku isdestyma gride
 create_db_button.grid(row=4, column=0, pady=15)
 create_coll_button.grid(row=4, column=1, pady=15)
 generate_button.grid(row=4, column=2, pady=15)
 update_button.grid(row=4, column=3, pady=15)
+# exec_time.grid(row=5, column=1)
 
 
 root.mainloop()
